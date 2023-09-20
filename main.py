@@ -46,6 +46,14 @@ def main():
         help="show last N of log lines",
         default=0,
     )
+    parser.add_argument(
+        "-g",
+        dest="grep",
+        default=None,
+        type=str,
+        help="print lines only with selected string",
+        required=False,
+    )
     args = parser.parse_args()
 
     while True:
@@ -82,10 +90,10 @@ def parse_log(log_content: str, args: argparse.Namespace):
         tail = args.tail
 
     for line in log_lines[-tail:]:
-        parse_log_line(line)
+        parse_log_line(line, args.grep)
 
 
-def parse_log_line(line_bytes: str):
+def parse_log_line(line_bytes: str, grep: str):
     # We read the log in binary form, so we need to convert it to a normal string
     line = line_bytes.decode("Latin-1").strip()
 
@@ -118,6 +126,8 @@ def parse_log_line(line_bytes: str):
     if lowercase_line.startswith("[assert] - error: game start seed was not set."):
         return
     if lowercase_line.startswith("[assert] - entity teleport detected!"):
+        return
+    if grep is not None and grep.lower() not in lowercase_line:
         return
 
     if (
