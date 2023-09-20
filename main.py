@@ -9,7 +9,6 @@ USERNAME = getpass.getuser()
 # EXPANSION_LEVEL = "Afterbirth"
 # EXPANSION_LEVEL = "Afterbirth+"
 EXPANSION_LEVEL = "Repentance"
-LOG_FILE_PATH = f"C:\\Users\\{USERNAME}\\Documents\\My Games\\Binding of Isaac {EXPANSION_LEVEL}\\log.txt"
 
 
 # From: https://stackoverflow.com/questions/287871/how-to-print-colored-text-to-the-terminal
@@ -33,6 +32,13 @@ cached_length = 0
 def main():
     parser = argparse.ArgumentParser(description="Log viewer for The Binding of Isaac.")
     parser.add_argument(
+        "-f",
+        dest="LOG_FILE_PATH",
+        default=f"C:\\Users\\{USERNAME}\\Documents\\My Games\\Binding of Isaac {EXPANSION_LEVEL}\\log.txt",
+        type=str,
+        help="custom filepath to TBoI log file.\nby default 'C:\\Users\\{USER}\\Documents\\My Games\\Binding of Isaac {EXPANSION}\\log.txt'",
+    )
+    parser.add_argument(
         "-t",
         "--tail",
         type=int,
@@ -43,7 +49,7 @@ def main():
     args = parser.parse_args()
 
     while True:
-        file_size = os.path.getsize(LOG_FILE_PATH)
+        file_size = os.path.getsize(args.LOG_FILE_PATH)
         if has_log_changed(file_size):
             read_log(file_size, args)
         time.sleep(0.1)
@@ -59,7 +65,7 @@ def read_log(file_size: int, args: argparse.Namespace):
 
     if log_file_handle is None or cached_length > file_size:
         # This is a new log file
-        log_file_handle = open(LOG_FILE_PATH, "rb")
+        log_file_handle = open(args.LOG_FILE_PATH, "rb")
     elif cached_length < file_size:
         # Append existing content
         log_file_handle.seek(cached_length)
