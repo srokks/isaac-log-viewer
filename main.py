@@ -54,6 +54,14 @@ def main():
         help="print lines only with selected string",
         required=False,
     )
+    parser.add_argument(
+        "-s",
+        dest="highlight",
+        default=None,
+        type=str,
+        help="highlights lines containing this string",
+        required=False,
+    )
     args = parser.parse_args()
 
     while True:
@@ -90,10 +98,10 @@ def parse_log(log_content: str, args: argparse.Namespace):
         tail = args.tail
 
     for line in log_lines[-tail:]:
-        parse_log_line(line, args.grep)
+        parse_log_line(line, args.grep, args.highlight)
 
 
-def parse_log_line(line_bytes: str, grep: str):
+def parse_log_line(line_bytes: str, grep: str, highlight: str):
     # We read the log in binary form, so we need to convert it to a normal string
     line = line_bytes.decode("Latin-1").strip()
 
@@ -140,6 +148,9 @@ def parse_log_line(line_bytes: str, grep: str):
     elif "warn" in lowercase_line:
         # Print all warnings
         print_color(line, BColors.WARNING)
+    elif highlight and highlight.lower() in lowercase_line:
+        # custom highlight
+        print_color(line, BColors.OKBLUE)
     elif "Compilation successful." in line:
         # Print IsaacScript success messages in green
         print_color(line, BColors.OKGREEN)
